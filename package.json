@@ -1,6 +1,6 @@
 {
     "name": "copy-speed-test",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "A utility to compare different node file copy strategies",
     "main": "index.js",
     "scripts": {
