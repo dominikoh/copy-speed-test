@@ -1,10 +1,18 @@
-import { FileCopyTest } from '../contracts';
+import { exec } from 'child_process';
+import { FileCopyTest, FileCopyTestArguments, FileDetails } from '../contracts';
+import { join } from 'path';
 
 export const winNative: FileCopyTest = {
-    canRun: true,
+    canRun: process.platform === 'win32',
     name: 'Windows Native Copy',
-    perform: () =>
-        new Promise((resolve) => {
-            setTimeout(resolve, 1500);
+    perform: (args: FileCopyTestArguments, fileDetails: FileDetails, runCount: number) =>
+        new Promise((resolve, reject) => {
+            const fileName = `${fileDetails.name}_winNative_${runCount}${fileDetails.extension}`;
+            exec(`copy "${args.sourceFile}" "${join(args.destinationFolder, fileName)}"`, (error) => {
+                if (error) {
+                    return reject(error);
+                }
+                resolve();
+            });
         }),
 };

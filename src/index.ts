@@ -4,22 +4,16 @@ import { stat } from 'fs';
 import mkdirp from 'mkdirp';
 import { parse } from 'ts-command-line-args';
 import { promisify } from 'util';
-import { testsInSet } from './constants';
-import { FileCopyTest, TestResult } from './contracts';
-import { average, deleteFolder } from './helpers';
+import { defaultTestsInSet } from './constants';
+import { FileCopyTest, FileCopyTestArguments, FileDetails, TestResult } from './contracts';
+import { average, deleteFolder, getFileDetails } from './helpers';
+import { fsCopyFile } from './tests/fs-copy';
 import { winNative } from './tests/win-native';
-
-interface ICommandArgs {
-    sourceFile: string;
-    destinationFolder: string;
-    force: boolean;
-    help: boolean;
-}
 
 const statPromisify = promisify(stat);
 
 async function runTests() {
-    const args = parse<ICommandArgs>(
+    const args = parse<FileCopyTestArguments>(
         {
             destinationFolder: { type: String, alias: 'd' },
             sourceFile: { type: String, alias: 's' },
@@ -29,6 +23,7 @@ async function runTests() {
                 alias: 'f',
                 description: 'Will delete the destination folder before starting if it exists.',
             },
+            testsInSet: { type: Number, defaultValue: defaultTestsInSet },
         },
         { helpArg: 'help' }
     );
@@ -37,44 +32,50 @@ async function runTests() {
 
     // Todo read file size and print
 
-    await runSets(args);
+    const fileDetails = getFileDetails(args.sourceFile);
+
+    await runSets(args, fileDetails);
 
     await cleanUp(args.destinationFolder);
 }
 
-async function runSets(args: ICommandArgs) {
-    const tests = [winNative].filter((test) => test.canRun);
+async function runSets(args: FileCopyTestArguments, fileDetails: FileDetails) {
+    const tests = [winNative, fsCopyFile].filter((test) => test.canRun);
     const results: TestResult[] = [];
 
     for (const test of tests) {
-        const result = await runSet(test, args);
+        const result = await runSet(test, args, fileDetails);
         results.push(result);
     }
 }
 
-async function runSet(test: FileCopyTest, args: ICommandArgs): Promise<TestResult> {
+async function runSet(test: FileCopyTest, args: FileCopyTestArguments, fileDetails: FileDetails): Promise<TestResult> {
     const message = `Running Test: ${test.name}`;
 
     const runs: number[] = [];
 
-    for (let index = 0; index < testsInSet; index++) {
-        const runMessage = `${message} ${index + 1}/${testsInSet}`;
+    for (let index = 0; index < args.testsInSet; index++) {
+        const runCount = index + 1;
+        const runMessage = `${message} ${runCount}/${args.testsInSet}`;
         const progress = writeProgressMessage(`${runMessage}`);
-        const result = await runTest(test, args);
+        const result = await runTest(test, args, fileDetails, runCount);
         runs.push(result);
         progress.complete(true, `${runMessage} (${result})`);
+
+        await new Promise((resolve) => setTimeout(resolve, 500)); // wait between each test
     }
 
     const averageTime = average(...runs);
+    const best = Math.min(...runs);
 
-    console.log(blue(`${test.name} Average: ${averageTime.toFixed(0)}`));
+    console.log(blue(`${test.name} Average: ${averageTime.toFixed(0)} Best: ${best}`));
 
-    return { runs, average: averageTime };
+    return { runs, average: averageTime, best };
 }
 
-async function runTest(test: FileCopyTest, args: ICommandArgs) {
+async function runTest(test: FileCopyTest, args: FileCopyTestArguments, fileDetails: FileDetails, runCount: number) {
     const testStart = Date.now();
-    await test.perform(args.sourceFile, args.destinationFolder);
+    await test.perform(args, fileDetails, runCount);
     const elapsed = Date.now() - testStart;
     return elapsed;
 }

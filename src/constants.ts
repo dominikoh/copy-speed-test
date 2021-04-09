@@ -1,1 +1,1 @@
-export const testsInSet = 3;
+export const defaultTestsInSet = 3;
