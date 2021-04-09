@@ -35,6 +35,14 @@ async function runTests() {
 
     await createDestinationFolder(args.destinationFolder, args.force);
 
+    // Todo read file size and print
+
+    await runSets(args);
+
+    await cleanUp(args.destinationFolder);
+}
+
+async function runSets(args: ICommandArgs) {
     const tests = [winNative].filter((test) => test.canRun);
     const results: TestResult[] = [];
 
@@ -42,8 +50,6 @@ async function runTests() {
         const result = await runSet(test, args);
         results.push(result);
     }
-
-    await cleanUp(args.destinationFolder);
 }
 
 async function runSet(test: FileCopyTest, args: ICommandArgs): Promise<TestResult> {
