@@ -11,3 +11,20 @@ export function deleteFolder(path: string): Promise<void> {
         });
     });
 }
+
+export function average(...values: number[]): number {
+    return sum(...values) / values.length;
+}
+
+export function sum(...values: number[]): number {
+    const valueOne = values.shift();
+    const valueTwo = values.shift();
+
+    if (valueOne == null) {
+        return NaN;
+    } else if (valueTwo == null) {
+        return valueOne;
+    }
+
+    return sum(valueOne + valueTwo, ...values);
+}
