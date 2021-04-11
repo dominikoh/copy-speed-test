@@ -1,8 +1,10 @@
 {
     "name": "copy-speed-test",
     "version": "1.0.1",
-    "description": "A utility to compare different node file copy strategies",
-    "main": "index.js",
+    "description": "A utility to compare different nodejs file copy strategies",
+    "bin": {
+        "copy-speed-test": "dist/index.js"
+    },
     "scripts": {
         "clean": "rimraf dist",
         "build": "tsc",
@@ -48,6 +50,7 @@
     "dependencies": {
         "apply-config": "^1.5.1",
         "chalk": "^4.1.0",
+        "console-table-printer": "^2.8.2",
         "mkdirp": "^1.0.4",
         "pretty-file-size": "^0.1.0",
         "progress-stream": "^2.0.0",

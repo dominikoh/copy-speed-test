@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { ProgressMessage, writeProgressMessage } from 'apply-config';
 import { blue, red, yellow } from 'chalk';
 import { stat } from 'fs';
@@ -13,6 +15,7 @@ import { winNative } from './tests/win-native';
 import formatFileSize from 'pretty-file-size';
 import { createReadStreamTest } from './tests/read-stream';
 import { linuxNative } from './tests/linux-native';
+import { Table } from 'console-table-printer';
 
 const statPromisify = promisify(stat);
 
@@ -32,9 +35,11 @@ async function runTests() {
 
     console.log(' ');
 
-    await runSets(args, fileDetails, bytesArray);
+    const results = await runSets(args, fileDetails, bytesArray);
 
     await cleanUp(args.destinationFolder);
+
+    printResult(results);
 }
 
 async function runSets(args: FileCopyTestArguments, fileDetails: FileDetails, bytesArray: number[]) {
@@ -51,6 +56,28 @@ async function runSets(args: FileCopyTestArguments, fileDetails: FileDetails, by
         const result = await runSet(test, args, fileDetails);
         results.push(result);
     }
+
+    return results;
+}
+
+function printResult(results: TestResult[]) {
+    const resultsTable = new Table({
+        columns: [
+            { name: 'name', title: 'Name', color: 'blue' },
+            { name: 'average', title: 'Average' },
+            { name: 'best', title: 'Best' },
+        ],
+    });
+
+    results.forEach((result) =>
+        resultsTable.addRow({
+            name: result.name,
+            average: `${result.average.toFixed(2)}s`,
+            best: `${result.best.toFixed(2)}s`,
+        })
+    );
+
+    resultsTable.printTable();
 }
 
 async function runSet(test: FileCopyTest, args: FileCopyTestArguments, fileDetails: FileDetails): Promise<TestResult> {
@@ -80,7 +107,7 @@ async function runSet(test: FileCopyTest, args: FileCopyTestArguments, fileDetai
     console.log(blue(`${test.name} Average: ${averageDisplay} (${averageSpeed}) Best: ${bestDisplay} (${bestSpeed})`));
 
     console.log(' ');
-    return { runs, average: averageTime, best: bestTime };
+    return { runs, average: averageTime, best: bestTime, name: test.name };
 }
 
 function calculateStats(runs: number[], fileDetails: FileDetails) {

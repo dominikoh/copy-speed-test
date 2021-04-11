@@ -30,6 +30,7 @@ export type FileCopyTest = {
 
 export type TestResult = {
     runs: number[];
+    name: string;
     average: number;
     best: number;
 };
