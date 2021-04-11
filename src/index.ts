@@ -7,7 +7,7 @@ import mkdirp from 'mkdirp';
 import { basename } from 'path';
 import { parse } from 'ts-command-line-args';
 import { promisify } from 'util';
-import { parseArgs } from './constants';
+import { parseArgs, parseOptions } from './constants';
 import { FileCopyTest, FileCopyTestArguments, FileDetails, TestResult } from './contracts';
 import { average, deleteFolder, getFileDetails, parseBytes } from './helpers';
 import { fsCopyFile } from './tests/fs-copy';
@@ -20,7 +20,7 @@ import { Table } from 'console-table-printer';
 const statPromisify = promisify(stat);
 
 async function runTests() {
-    const args = parse<FileCopyTestArguments>(parseArgs, { helpArg: 'help' });
+    const args = parse<FileCopyTestArguments>(parseArgs, parseOptions);
     const bytesArray = args.highWaterMark
         .reduce((all, current) => [...all, ...current.split(',')], new Array<string>())
         .map(parseBytes);
