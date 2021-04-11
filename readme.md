@@ -26,4 +26,4 @@
 
 ## Sample Output
 
-![Sample Output](assets/sampleOutput.jpg)
+![Sample Output](/assets/sampleOutput.jpg)
