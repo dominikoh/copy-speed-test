@@ -26,4 +26,5 @@
 
 ## Sample Output
 
-![sampleOutput](https://user-images.githubusercontent.com/10414642/114300211-06e07c80-9ab7-11eb-985a-6e7e1d8dd04b.JPG)
+![image](https://user-images.githubusercontent.com/10414642/114300264-4ad38180-9ab7-11eb-8679-eb7ae3333ce0.png)
+
