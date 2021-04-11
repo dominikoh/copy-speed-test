@@ -26,4 +26,4 @@
 
 ## Sample Output
 
-![Sample Output](/assets/sampleOutput.jpg)
+![sampleOutput](https://user-images.githubusercontent.com/10414642/114300211-06e07c80-9ab7-11eb-985a-6e7e1d8dd04b.JPG)
