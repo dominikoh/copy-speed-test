@@ -1,46 +1,45 @@
-import { writeProgressMessage } from 'apply-config';
-import { blue, red } from 'chalk';
+import { ProgressMessage, writeProgressMessage } from 'apply-config';
+import { blue, red, yellow } from 'chalk';
 import { stat } from 'fs';
 import mkdirp from 'mkdirp';
+import { basename } from 'path';
 import { parse } from 'ts-command-line-args';
 import { promisify } from 'util';
-import { defaultTestsInSet } from './constants';
+import { parseArgs } from './constants';
 import { FileCopyTest, FileCopyTestArguments, FileDetails, TestResult } from './contracts';
-import { average, deleteFolder, getFileDetails } from './helpers';
+import { average, deleteFolder, getFileDetails, parseBytes } from './helpers';
 import { fsCopyFile } from './tests/fs-copy';
 import { winNative } from './tests/win-native';
+import formatFileSize from 'pretty-file-size';
+import { createReadStreamTest } from './tests/read-stream';
 
 const statPromisify = promisify(stat);
 
 async function runTests() {
-    const args = parse<FileCopyTestArguments>(
-        {
-            destinationFolder: { type: String, alias: 'd' },
-            sourceFile: { type: String, alias: 's' },
-            help: { type: Boolean, alias: 'h' },
-            force: {
-                type: Boolean,
-                alias: 'f',
-                description: 'Will delete the destination folder before starting if it exists.',
-            },
-            testsInSet: { type: Number, defaultValue: defaultTestsInSet },
-        },
-        { helpArg: 'help' }
-    );
+    const args = parse<FileCopyTestArguments>(parseArgs, { helpArg: 'help' });
+    const bytesArray = args.highWaterMark
+        .reduce((all, current) => [...all, ...current.split(',')], new Array<string>())
+        .map(parseBytes);
 
     await createDestinationFolder(args.destinationFolder, args.force);
 
-    // Todo read file size and print
+    const fileDetails = await getFileDetails(args.sourceFile);
 
-    const fileDetails = getFileDetails(args.sourceFile);
+    console.log(' ');
 
-    await runSets(args, fileDetails);
+    console.log(blue(`Copying '${basename(args.sourceFile)}' (${formatFileSize(fileDetails.size)})`));
+
+    console.log(' ');
+
+    await runSets(args, fileDetails, bytesArray);
 
     await cleanUp(args.destinationFolder);
 }
 
-async function runSets(args: FileCopyTestArguments, fileDetails: FileDetails) {
-    const tests = [winNative, fsCopyFile].filter((test) => test.canRun);
+async function runSets(args: FileCopyTestArguments, fileDetails: FileDetails, bytesArray: number[]) {
+    const tests = [createReadStreamTest(), ...bytesArray.map(createReadStreamTest), winNative, fsCopyFile].filter(
+        (test) => test.canRun
+    );
     const results: TestResult[] = [];
 
     for (const test of tests) {
@@ -54,28 +53,56 @@ async function runSet(test: FileCopyTest, args: FileCopyTestArguments, fileDetai
 
     const runs: number[] = [];
 
+    console.log(blue(test.name));
+    console.log(yellow(test.description));
+
     for (let index = 0; index < args.testsInSet; index++) {
         const runCount = index + 1;
         const runMessage = `${message} ${runCount}/${args.testsInSet}`;
-        const progress = writeProgressMessage(`${runMessage}`);
-        const result = await runTest(test, args, fileDetails, runCount);
+        const progress = writeProgressMessage(runMessage, true);
+        const result = (await runTest(test, args, fileDetails, runCount, progress)) / 1000;
         runs.push(result);
-        progress.complete(true, `${runMessage} (${result})`);
+        progress.complete(true, `${runMessage} (${result.toFixed(1)}s)`);
 
         await new Promise((resolve) => setTimeout(resolve, 500)); // wait between each test
     }
 
-    const averageTime = average(...runs);
-    const best = Math.min(...runs);
+    const { averageTime, bestTime, averageSpeed, bestSpeed, averageDisplay, bestDisplay } = calculateStats(
+        runs,
+        fileDetails
+    );
 
-    console.log(blue(`${test.name} Average: ${averageTime.toFixed(0)} Best: ${best}`));
+    console.log(blue(`${test.name} Average: ${averageDisplay} (${averageSpeed}) Best: ${bestDisplay} (${bestSpeed})`));
 
-    return { runs, average: averageTime, best };
+    console.log(' ');
+    return { runs, average: averageTime, best: bestTime };
 }
 
-async function runTest(test: FileCopyTest, args: FileCopyTestArguments, fileDetails: FileDetails, runCount: number) {
+function calculateStats(runs: number[], fileDetails: FileDetails) {
+    const averageTime = average(...runs);
+    const averageSpeed = formatFileSize(fileDetails.size / averageTime);
+    const bestTime = Math.min(...runs);
+    const bestSpeed = formatFileSize(fileDetails.size / bestTime);
+
+    return {
+        averageDisplay: `${averageTime.toFixed(1)}s`,
+        bestDisplay: `${bestTime.toFixed(1)}s`,
+        averageSpeed: `${averageSpeed}/s`,
+        bestSpeed: `${bestSpeed}/s`,
+        bestTime,
+        averageTime,
+    };
+}
+
+async function runTest(
+    test: FileCopyTest,
+    args: FileCopyTestArguments,
+    fileDetails: FileDetails,
+    runCount: number,
+    progress: ProgressMessage
+) {
     const testStart = Date.now();
-    await test.perform(args, fileDetails, runCount);
+    await test.perform(args, fileDetails, runCount, progress);
     const elapsed = Date.now() - testStart;
     return elapsed;
 }
@@ -91,7 +118,7 @@ async function createDestinationFolder(path: string, force: boolean) {
 
     if (destinationStat != null) {
         if (force) {
-            deleteFolder(path);
+            await cleanUp(path);
         } else {
             console.log(
                 red(

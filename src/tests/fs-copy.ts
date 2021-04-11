@@ -5,6 +5,7 @@ import { promisify } from 'util';
 
 export const fsCopyFile: FileCopyTest = {
     canRun: true,
+    description: `fs.copyFile(sourceFile destinationPath)`,
     name: 'fs copyfile',
     perform: (args: FileCopyTestArguments, fileDetails: FileDetails, runCount: number) =>
         promisify(copyFile)(

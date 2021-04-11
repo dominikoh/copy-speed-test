@@ -4,6 +4,7 @@ import { join } from 'path';
 
 export const winNative: FileCopyTest = {
     canRun: process.platform === 'win32',
+    description: `child_process.exec('copy sourceFile destinationPath')`,
     name: 'Windows Native Copy',
     perform: (args: FileCopyTestArguments, fileDetails: FileDetails, runCount: number) =>
         new Promise((resolve, reject) => {

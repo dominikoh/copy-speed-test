@@ -1,20 +1,30 @@
+import { ProgressMessage } from 'apply-config';
+
 export type FileCopyTestArguments = {
     sourceFile: string;
     destinationFolder: string;
     force: boolean;
     help: boolean;
     testsInSet: number;
+    highWaterMark: string[];
 };
 
 export type FileDetails = {
     path: string;
     name: string;
     extension: string;
+    size: number;
 };
 
 export type FileCopyTest = {
     readonly name: string;
-    readonly perform: (args: FileCopyTestArguments, fileDetails: FileDetails, runCount: number) => Promise<void>;
+    readonly description: string;
+    readonly perform: (
+        args: FileCopyTestArguments,
+        fileDetails: FileDetails,
+        runCount: number,
+        progress: ProgressMessage
+    ) => Promise<void>;
     readonly canRun: boolean;
 };
 
