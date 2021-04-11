@@ -12,6 +12,7 @@ import { fsCopyFile } from './tests/fs-copy';
 import { winNative } from './tests/win-native';
 import formatFileSize from 'pretty-file-size';
 import { createReadStreamTest } from './tests/read-stream';
+import { linuxNative } from './tests/linux-native';
 
 const statPromisify = promisify(stat);
 
@@ -37,9 +38,13 @@ async function runTests() {
 }
 
 async function runSets(args: FileCopyTestArguments, fileDetails: FileDetails, bytesArray: number[]) {
-    const tests = [createReadStreamTest(), ...bytesArray.map(createReadStreamTest), winNative, fsCopyFile].filter(
-        (test) => test.canRun
-    );
+    const tests = [
+        winNative,
+        linuxNative,
+        fsCopyFile,
+        createReadStreamTest(),
+        ...bytesArray.map(createReadStreamTest),
+    ].filter((test) => test.canRun);
     const results: TestResult[] = [];
 
     for (const test of tests) {
