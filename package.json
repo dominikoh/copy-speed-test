@@ -1,6 +1,6 @@
 {
     "name": "copy-speed-test",
-    "version": "1.1.4",
+    "version": "1.1.5",
     "description": "A utility to compare different nodejs file copy strategies",
     "bin": {
         "copy-speed-test": "dist/index.js"
@@ -21,7 +21,14 @@
         "type": "git",
         "url": "git+https://github.com/Roaders/copy-speed-test.git"
     },
-    "keywords": ["nodejs", "copy", "file", "createReadStream", "speed", "test"],
+    "keywords": [
+        "nodejs",
+        "copy",
+        "file",
+        "createReadStream",
+        "speed",
+        "test"
+    ],
     "author": "Giles Roadnight",
     "license": "ISC",
     "bugs": {
