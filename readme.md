@@ -21,3 +21,9 @@
 | **testsInSet** | | number | The number of times to run each test. Defaults to 3. |
 | **highWaterMark** | | string[] | An Array of highwatermark values to run the createReadStream test at. Defaults to ['1 MB', '100.0 MB', '500.00 MB', '1.000 GB']. Set multiple values as follows: '--highWaterMark="50 kB,150 MB,1 GB"' |
 | **help** | **h** | boolean | Shows this help guide |
+
+[//]: ####ts-command-line-args_write-markdown_replaceAbove
+
+## Sample Output
+
+![Sample Output](assets/sampleOutput.jpg)
