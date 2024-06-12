@@ -1,3 +1,8 @@
+# Prerequisites
+For parallel testing, you will need to install the [GNU parallel](https://www.gnu.org/software/parallel/sphinx.html) utility. On a Mac, you can do this with homebrew:
+```
+brew install parallel
+```
 
 # copy-speed-test
 
