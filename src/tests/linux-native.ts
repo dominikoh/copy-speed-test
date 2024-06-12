@@ -3,7 +3,7 @@ import { FileCopyTest, FileCopyTestArguments, FileDetails } from '../contracts';
 import { join } from 'path';
 
 export const linuxNative: FileCopyTest = {
-    canRun: process.platform === 'linux',
+    canRun: process.platform === 'linux' || process.platform === 'darwin',
     description: `child_process.exec('cp sourceFile destinationPath')`,
     name: 'Linux Native Copy',
     perform: (args: FileCopyTestArguments, fileDetails: FileDetails, runCount: number) =>

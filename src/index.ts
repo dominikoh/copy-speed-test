@@ -32,6 +32,7 @@ async function runTests() {
     console.log(' ');
 
     console.log(blue(`Copying '${basename(args.sourceFile)}' (${formatFileSize(fileDetails.size)})`));
+    console.log(blue(`Running platform: ${process.platform}`));
 
     console.log(' ');
 
