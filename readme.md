@@ -6,7 +6,14 @@
  ## Usage
 
  ```
- npx copy-speed-test --source someFile.zip --destination someNonExistentFolder
+ npx copy-speed-test -s someFile.zip -d someNonExistentFolder
+ ```
+
+ ## Run from build
+
+ ```
+ npm run build
+ npm run start -- -s someFile.zip -d someNonExistentFolder
  ```
 
 [//]: ####ts-command-line-args_write-markdown_replaceBelow
