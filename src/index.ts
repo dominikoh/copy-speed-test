@@ -16,6 +16,7 @@ import formatFileSize from 'pretty-file-size';
 import { createReadStreamTest } from './tests/read-stream';
 import { linuxNative } from './tests/linux-native';
 import { Table } from 'console-table-printer';
+import { linuxNativeParallel } from './tests/linux-native-parallel';
 
 const statPromisify = promisify(stat);
 
@@ -44,9 +45,11 @@ async function runTests() {
 }
 
 async function runSets(args: FileCopyTestArguments, fileDetails: FileDetails, bytesArray: number[]) {
+    const threads = [1, 3, 5, 10];
     const tests = [
         winNative,
         linuxNative,
+        ...threads.map(linuxNativeParallel),
         fsCopyFile,
         createReadStreamTest(),
         ...bytesArray.map(createReadStreamTest),
