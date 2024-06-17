@@ -11,7 +11,7 @@ export function linuxNativeParallel(thread?: number): FileCopyTest {
         perform: (args: FileCopyTestArguments, fileDetails: FileDetails, runCount: number) =>
             new Promise((resolve, reject) => {
                 exec(
-                    `parallel --will-cite -j ${threadCount} cp -r ::: "${fileDetails.path}" ::: "${args.destinationFolder}"`,
+                    `find ${fileDetails.path} -type f | parallel --will-cite -j ${threadCount} cp {} "${args.destinationFolder}/"`,
                     (error) => {
                         if (error) {
                             return reject(error);
