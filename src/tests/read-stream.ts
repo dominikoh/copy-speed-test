@@ -49,7 +49,10 @@ export function createReadStreamTest(highWaterMark?: number): FileCopyTest {
         ) => {
             return Promise.all(
                 fileDetails.files.map((file) => {
-                    const destination = join(args.destinationFolder, `${file.name}_fs-createReadStream_${runCount}`);
+                    const destination = join(
+                        args.destinationFolder,
+                        `fs-createReadStream_${highWaterMark}_${runCount}${file.name}`
+                    );
                     return streamCopyFile(file, destination, progressMessage, highWaterMark);
                 })
             ).then(() => undefined);

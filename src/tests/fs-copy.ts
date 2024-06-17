@@ -10,10 +10,7 @@ export const fsCopyFile: FileCopyTest = {
     perform: (args: FileCopyTestArguments, fileDetails: FileDetails, runCount: number) => {
         return Promise.all(
             fileDetails.files.map((file) =>
-                promisify(copyFile)(
-                    file.path,
-                    join(args.destinationFolder, `${file.name}_fs-copy_${runCount}${file.name}`)
-                )
+                promisify(copyFile)(file.path, join(args.destinationFolder, `fs-copy_${runCount}${file.name}`))
             )
         ).then(() => undefined);
     },
