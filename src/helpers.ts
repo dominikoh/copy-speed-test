@@ -1,8 +1,9 @@
 import rimraf from 'rimraf';
-import { FileDetails } from './contracts';
-import { basename, extname } from 'path';
+import { FileDetails, FileInfo } from './contracts';
+import { basename } from 'path';
 import { promisify } from 'util';
-import { stat } from 'fs';
+import { readdir, stat } from 'fs';
+import { join } from 'path';
 
 export function deleteFolder(path: string): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -33,18 +34,52 @@ export function sum(...values: number[]): number {
     return sum(valueOne + valueTwo, ...values);
 }
 
-export async function getFileDetails(path: string): Promise<FileDetails> {
-    const extension = extname(path);
-    const name = basename(path, extension);
+export function getFileName(path: string): string {
+    return basename(path);
+}
 
+export async function getFileDetails(path: string): Promise<FileDetails> {
     const stats = await promisify(stat)(path);
+    const isFile = !stats.isDirectory();
+    let size = stats.size;
+    let files: FileInfo[] = [];
+
+    if (isFile) {
+        files.push({
+            path,
+            name: getFileName(path),
+            size: stats.size,
+        });
+    } else {
+        files = await getAllFilesInDirectory(path);
+        size = files.reduce((total, file) => total + file.size, 0);
+    }
 
     return {
         path,
-        name,
-        extension,
-        size: stats.size,
+        name: getFileName(path),
+        size: size,
+        isFile: isFile,
+        files: files,
     };
+}
+
+export async function getAllFilesInDirectory(path: string, fileInfo: FileInfo[] = []): Promise<FileInfo[]> {
+    const files = await promisify(readdir)(path);
+
+    for (const file of files) {
+        const stats = await promisify(stat)(join(path, file));
+        if (stats.isDirectory()) fileInfo = await getAllFilesInDirectory(join(path, file), fileInfo);
+        else {
+            fileInfo.push({
+                path: join(path, file),
+                name: file,
+                size: stats.size,
+            });
+        }
+    }
+
+    return fileInfo;
 }
 
 export const kilobyte = 1024;

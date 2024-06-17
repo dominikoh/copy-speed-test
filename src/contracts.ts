@@ -12,7 +12,14 @@ export type FileCopyTestArguments = {
 export type FileDetails = {
     path: string;
     name: string;
-    extension: string;
+    size: number;
+    isFile: boolean;
+    files: FileInfo[];
+};
+
+export type FileInfo = {
+    path: string;
+    name: string;
     size: number;
 };
 

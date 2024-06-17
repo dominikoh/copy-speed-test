@@ -4,7 +4,6 @@ import { ProgressMessage, writeProgressMessage } from 'apply-config';
 import { blue, red, yellow } from 'chalk';
 import { stat } from 'fs';
 import mkdirp from 'mkdirp';
-import { basename } from 'path';
 import { parse } from 'ts-command-line-args';
 import { promisify } from 'util';
 import { parseArgs, parseOptions } from './constants';
@@ -32,7 +31,7 @@ async function runTests() {
 
     console.log(' ');
 
-    console.log(blue(`Copying '${basename(args.sourceFile)}' (${formatFileSize(fileDetails.size)})`));
+    console.log(blue(`Copying ${fileDetails.name} : ${formatFileSize(fileDetails.size)}`));
     console.log(blue(`Running platform: ${process.platform}`));
 
     console.log(' ');

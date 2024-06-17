@@ -14,7 +14,11 @@ export const parseArgs: ArgumentConfig<FileCopyTestArguments> = {
         alias: 'd',
         description: 'A folder to copy to. The folder should not exist. It will be deleted after the tests complete',
     },
-    sourceFile: { type: String, alias: 's', description: 'The file to copy' },
+    sourceFile: {
+        type: String,
+        alias: 's',
+        description: 'The file or directory to copy',
+    },
     force: {
         type: Boolean,
         alias: 'f',
