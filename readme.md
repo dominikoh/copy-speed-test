@@ -4,6 +4,17 @@ For parallel testing, you will need to install the [GNU parallel](https://www.gn
 brew install parallel
 ```
 
+## create sample data files
+```
+mkdir data
+cd data
+```
+
+To create a set of 1000 files, each 24MB in size, you can run the following command:
+```
+for i in {1..1000}; do dd if=/dev/urandom bs=24M count=1 of=file$i; done >/dev/null 2>&1
+```
+
 # copy-speed-test
 
  > A utility to compare different nodejs file copy strategies
